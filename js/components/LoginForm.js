@@ -1,5 +1,5 @@
 import InputWrapper from "./InputWrapper.js";
-import { validateEmail } from "../utils.js";
+import { validateEmail, saveCurrentUser, getDataFromDoc } from "../utils.js";
 
 const $template = document.createElement('template');
 $template.innerHTML = /*html*/ `
@@ -48,6 +48,8 @@ export default class LoginForm extends HTMLElement {
                 if(result.empty) {
                     alert("Email hoặc mật khẩu không chính xác");
                 } else {
+                    console.log(result);
+                    saveCurrentUser(getDataFromDoc(result.docs[0]));
                     router.navigate('/chat');
                 }
             }

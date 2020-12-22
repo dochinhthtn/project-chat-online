@@ -16,3 +16,19 @@ export function getDataFromDocs(docs, excepts = []) {
         return getDataFromDoc(doc, excepts);
     });
 }
+
+// lưu thông tin người dùng hiện tại vào localStorage
+export function saveCurrentUser(user) {
+    localStorage.setItem('current-user', JSON.stringify(user));
+}
+
+// lấy thông tin người dùng hiện tại từ localStorage
+export function getCurrentUser() {
+    let result = localStorage.getItem('current-user');
+
+    if(result) {
+        return JSON.parse(result);
+    }
+
+    return null;
+}

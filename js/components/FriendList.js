@@ -1,6 +1,6 @@
 import FriendContainer from "./FriendContainer.js";
 import InputWrapper from "./InputWrapper.js";
-import { getDataFromDoc, getDataFromDocs } from "../utils.js";
+import { getDataFromDoc, getDataFromDocs, getCurrentUser } from "../utils.js";
 
 const $template = document.createElement('template');
 $template.innerHTML = /*html*/ `
@@ -73,13 +73,38 @@ export default class FriendList extends HTMLElement {
             let isPassed = InputWrapper.validate(this.$searchFriendKeyword, (value) => value != '', "Nhập vào tên bạn bè");
 
             if (isPassed) {
+                // lấy ra những người dùng có tên thỏa mãn
                 let result = await firebase
                     .firestore()
                     .collection('users')
                     .where('name', '==', keyword)
                     .get();
 
-                console.log(getDataFromDocs(result.docs));
+                let data = getDataFromDocs(result.docs);
+
+                // kiểm tra những người dùng tìm được có phải là bạn của người dùng hiện tại không
+                let currentUser = getCurrentUser();
+
+                // lấy ra tất cả người bạn của người dùng hiện tại
+                result = await firebase
+                    .firestore()
+                    .collection('friends')
+                    .where('relation', 'array-contains', currentUser.id)
+                    .get();
+
+                let existFriends = getDataFromDocs(result.docs);
+
+                // so sánh giữa những người tìm được và những người bạn
+                for(let friendData of data) {
+                    let exist = existFriends.find(function(existFriend) {
+                        let relation = existFriend.relation;
+                        return relation[0] == friendData.id || relation[1] == friendData.id;
+                    });
+
+                    friendData.isFriend = (exist) ? true : false;
+                }
+
+                this.setAttribute('data', JSON.stringify(data));
             }
         }
     }
@@ -91,8 +116,10 @@ export default class FriendList extends HTMLElement {
     attributeChangedCallback(attrName, oldValue, newValue) {
         if (attrName == 'data') {
             let friendsData = JSON.parse(newValue);
+
+            this.$friendList.innerHTML = '';
             for (let friendData of friendsData) {
-                let $friendContainer = new FriendContainer(friendData.name);
+                let $friendContainer = new FriendContainer(friendData.name, friendData.email, friendData.isFriend);
                 this.$friendList.appendChild($friendContainer);
             }
         }
