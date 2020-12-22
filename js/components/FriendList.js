@@ -103,7 +103,7 @@ export default class FriendList extends HTMLElement {
 
                     friendData.isFriend = (exist) ? true : false;
                 }
-
+                console.log('hehehe');
                 this.setAttribute('data', JSON.stringify(data));
             }
         }
