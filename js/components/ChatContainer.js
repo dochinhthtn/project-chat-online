@@ -38,6 +38,10 @@ $template.innerHTML = /*html*/ `
             border-radius: 5px;
             color: #ffffff;
         }
+
+        message-list {
+            height: calc(100% - 55px - 70px);
+        }
     </style>
 
 
@@ -51,17 +55,44 @@ $template.innerHTML = /*html*/ `
     </div>
 `;
 
+let fakeMessageList = [
+    { content: 'xin chào', owned: true, dateModified: '2020/12/26' },
+    { content: 'do you speak English?', owned: false, dateModified: '2020/12/26' },
+    { content: 'có', owned: true, dateModified: '2020/12/26' },
+    { content: 'english please!', owned: false, dateModified: '2020/12/26' },
+    { content: 'ok man. Hi there', owned: true, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
+    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' }
+];
+
 export default class ChatContainer extends HTMLElement {
     constructor() {
         super();
 
-        this.attachShadow({mode: 'open'});
+        this.attachShadow({ mode: 'open' });
         this.shadowRoot.appendChild($template.content.cloneNode(true));
 
         this.$chatInfo = this.shadowRoot.getElementById('chat-info');
         this.$messageList = this.shadowRoot.querySelector('message-list');
         this.$sendMessageForm = this.shadowRoot.getElementById('send-message-form');
         this.$messageContent = this.shadowRoot.getElementById('message-content');
+    }
+
+    connectedCallback() {
+        this.$messageList.setAttribute('data', JSON.stringify(fakeMessageList));
     }
 
 }
