@@ -2,8 +2,27 @@ import { getCurrentUser, getDataFromDoc, getDataFromDocs } from "../utils.js";
 
 const $template = document.createElement('template');
 $template.innerHTML = /*html*/ `
-    <friend-list></friend-list>
-    <chat-contaner></chat-container>
+    <style>
+        #chat-screen {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        friend-list {
+            width: 30%;
+            height: 100vh;
+        }
+
+        chat-container {
+            width: 69%;
+            height: 100vh;
+        }
+    </style>
+
+    <div id="chat-screen">
+        <friend-list></friend-list>
+        <chat-container></chat-container>
+    </div>
 `;
 
 export default class ChatScreen extends HTMLElement {

@@ -8,6 +8,12 @@ $template.innerHTML = /*html*/ `
         * {
             background-color: #f1f1f2;
         }
+
+        #wrapper {
+            background-color: #f1f1f2;
+            height: 100%;
+        }
+
         #title {
             padding: 15px 0px;
             font-family: Arial;
@@ -38,16 +44,20 @@ $template.innerHTML = /*html*/ `
             width: calc(100% - 100px - 15px);
         }
     </style>
-    <div id="title">
-        Bạn bè  
+
+    <div id="wrapper">
+        <div id="title">
+            Bạn bè  
+        </div>
+
+        <form id="search-friend-form">
+            <input-wrapper id="search-friend-keyword" label="" type="text" error=""></input-wrapper>
+            <button id="search-friend-btn">Tìm kiếm</button>
+        </form>
+
+        <div id="friend-list"></div>
     </div>
 
-    <form id="search-friend-form">
-        <input-wrapper id="search-friend-keyword" label="" type="text" error=""></input-wrapper>
-        <button id="search-friend-btn">Tìm kiếm</button>
-    </form>
-
-    <div id="friend-list"></div>
 `;
 
 export default class FriendList extends HTMLElement {
