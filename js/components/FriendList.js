@@ -67,43 +67,10 @@ export default class FriendList extends HTMLElement {
     connectedCallback() {
         this.$searchFriendForm.onsubmit = async (event) => {
             event.preventDefault();
-
             let keyword = this.$searchFriendKeyword.value();
-
             let isPassed = InputWrapper.validate(this.$searchFriendKeyword, (value) => value != '', "Nhập vào tên bạn bè");
-
             if (isPassed) {
-                // lấy ra những người dùng có tên thỏa mãn
-                let result = await firebase
-                    .firestore()
-                    .collection('users')
-                    .where('name', '==', keyword)
-                    .get();
-
-                let data = getDataFromDocs(result.docs);
-
-                // kiểm tra những người dùng tìm được có phải là bạn của người dùng hiện tại không
-                let currentUser = getCurrentUser();
-
-                // lấy ra tất cả người bạn của người dùng hiện tại
-                result = await firebase
-                    .firestore()
-                    .collection('friends')
-                    .where('relation', 'array-contains', currentUser.id)
-                    .get();
-
-                let existFriends = getDataFromDocs(result.docs);
-
-                // so sánh giữa những người tìm được và những người bạn
-                for(let friendData of data) {
-                    let exist = existFriends.find(function(existFriend) {
-                        let relation = existFriend.relation;
-                        return relation[0] == friendData.id || relation[1] == friendData.id;
-                    });
-
-                    friendData.isFriend = (exist) ? true : false;
-                }
-                console.log('hehehe');
+                let data = await this.searchFriendsByName(keyword);
                 this.setAttribute('data', JSON.stringify(data));
             }
         }
@@ -119,11 +86,53 @@ export default class FriendList extends HTMLElement {
 
             this.$friendList.innerHTML = '';
             for (let friendData of friendsData) {
-                let $friendContainer = new FriendContainer(friendData.name, friendData.email, friendData.isFriend);
+                let $friendContainer = new FriendContainer(
+                    friendData.id,
+                    friendData.name,
+                    friendData.email,
+                    friendData.isFriend
+                );
+                
                 this.$friendList.appendChild($friendContainer);
             }
         }
     }
+
+    async searchFriendsByName(name) {
+        // lấy ra những người dùng có tên thỏa mãn
+        let result = await firebase
+            .firestore()
+            .collection('users')
+            .where('name', '==', name)
+            .get();
+
+        let data = getDataFromDocs(result.docs);
+
+        // kiểm tra những người dùng tìm được có phải là bạn của người dùng hiện tại không
+        let currentUser = getCurrentUser();
+
+        // lấy ra tất cả người bạn của người dùng hiện tại
+        result = await firebase
+            .firestore()
+            .collection('friends')
+            .where('relation', 'array-contains', currentUser.id)
+            .get();
+
+        let existFriends = getDataFromDocs(result.docs);
+
+        // so sánh giữa những người tìm được và những người bạn
+        for (let friendData of data) {
+            let exist = existFriends.find(function (existFriend) {
+                let relation = existFriend.relation;
+                return relation[0] == friendData.id || relation[1] == friendData.id;
+            });
+
+            friendData.isFriend = (exist) ? true : false;
+        }
+
+        return data;
+    }
+
 }
 
 window.customElements.define('friend-list', FriendList);

@@ -1,3 +1,5 @@
+import { getCurrentUser } from "../utils.js";
+
 const $template = document.createElement('template');
 $template.innerHTML = /*html*/ `
     <style>
@@ -28,14 +30,15 @@ $template.innerHTML = /*html*/ `
 `;
 
 export default class FriendContainer extends HTMLElement {
-    constructor(name, email, isFriend) {
+    constructor(id, name, email, isFriend) {
         super();
-        this.attachShadow({mode: 'open'});
+        this.attachShadow({ mode: 'open' });
         this.shadowRoot.appendChild($template.content.cloneNode(true));
         this.$friendName = this.shadowRoot.getElementById('friend-name');
         this.$friendEmail = this.shadowRoot.getElementById('friend-email');
         this.$makeFriend = this.shadowRoot.getElementById('make-friend-btn');
 
+        this.id = id;
         this.setAttribute('name', name);
         this.setAttribute('email', email);
         this.setAttribute('is-friend', isFriend);
@@ -45,18 +48,39 @@ export default class FriendContainer extends HTMLElement {
         return ['name', 'email', 'is-friend'];
     }
 
+    connectedCallback() {
+        this.$makeFriend.onclick = async () => {
+            this.$makeFriend.disabled = true; // tạm khóa nút
+            await this.makeFriend(this.id);
+            this.$makeFriend.style.display = "none"; // ẩn nút
+        }
+    }
+
     attributeChangedCallback(attrName, oldValue, newValue) {
-        if(attrName == 'name') {
+        if (attrName == 'name') {
             this.$friendName.innerHTML = newValue;
-        } else if(attrName == 'email') {
+        } else if (attrName == 'email') {
             this.$friendEmail.innerHTML = newValue;
-        } else if(attrName == 'is-friend') {
-            if(newValue == "true") {
+        } else if (attrName == 'is-friend') {
+            if (newValue == "true") {
                 this.$makeFriend.style.display = "none";
-            } else if(newValue == "false"){
+            } else if (newValue == "false") {
                 this.$makeFriend.style.display = "block";
             }
         }
+    }
+
+    async makeFriend(userId) {
+        let currentUser = getCurrentUser();
+        await firebase
+            .firestore()
+            .collection('friends')
+            .add({
+                relation: [
+                    currentUser.id,
+                    userId
+                ]
+            });
     }
 }
 
