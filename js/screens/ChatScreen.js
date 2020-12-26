@@ -20,6 +20,9 @@ export default class ChatScreen extends HTMLElement {
     async connectedCallback() {
         let friendsData = await this.loadFriends();
         console.log(friendsData);
+
+        // thay đổi giá trị thuộc tính data của friend-list
+        this.$friendList.setAttribute('data', JSON.stringify(friendsData));
     }
 
     async loadFriends() {
@@ -53,7 +56,11 @@ export default class ChatScreen extends HTMLElement {
                 .collection('users')
                 .doc(friendId)
                 .get();
-            friendsData.push(getDataFromDoc(result));
+            
+            let friendData = getDataFromDoc(result);
+            friendData.isFriend = true;
+
+            friendsData.push(friendData);
         }
 
         return friendsData;
