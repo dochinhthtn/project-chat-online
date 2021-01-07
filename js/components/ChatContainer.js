@@ -1,3 +1,5 @@
+import { getDataFromDoc, getCurrentUser, getDataFromDocs } from "../utils.js";
+
 const $template = document.createElement('template');
 $template.innerHTML = /*html*/ `
     <style>
@@ -55,28 +57,6 @@ $template.innerHTML = /*html*/ `
     </div>
 `;
 
-let fakeMessageList = [
-    { content: 'xin chào', owned: true, dateModified: '2020/12/26' },
-    { content: 'do you speak English?', owned: false, dateModified: '2020/12/26' },
-    { content: 'có', owned: true, dateModified: '2020/12/26' },
-    { content: 'english please!', owned: false, dateModified: '2020/12/26' },
-    { content: 'ok man. Hi there', owned: true, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' },
-    { content: 'chào cậu', owned: false, dateModified: '2020/12/26' }
-];
 
 export default class ChatContainer extends HTMLElement {
     constructor() {
@@ -91,8 +71,77 @@ export default class ChatContainer extends HTMLElement {
         this.$messageContent = this.shadowRoot.getElementById('message-content');
     }
 
+    static get observedAttributes() {
+        return ['current-chat'];
+    }
+
     connectedCallback() {
-        this.$messageList.setAttribute('data', JSON.stringify(fakeMessageList));
+        // this.$messageList.setAttribute('data', JSON.stringify(fakeMessageList));
+
+        this.$sendMessageForm.onsubmit = (event) => {
+            event.preventDefault();
+            let content = this.$messageContent.value();
+            if(content != '') {
+                this.sendMessage(content);
+                this.$messageContent.value('');
+                // this.$messageContent.setAttribute('value', '');
+            } else {
+                alert("Nhập vào nội dung tin nhắn 😑😑");
+            }
+        }
+    }
+
+    async attributeChangedCallback(attrName, oldValue, newValue) {
+        if (attrName == 'current-chat') {
+            console.log("Bạn đang chat với " + newValue);
+
+            let friendInfo = await this.loadFriendInfo();
+            this.$chatInfo.innerHTML = friendInfo.name;
+            this.loadMessages();
+        }
+    }
+
+    async loadFriendInfo() {
+        let friendId = this.getAttribute('current-chat'); // lấy id của thằng bạn
+        let result = await firebase
+            .firestore()
+            .collection('users')
+            .doc(friendId)
+            .get();
+        
+        return getDataFromDoc(result);
+    }
+
+    loadMessages() {
+        let currentUser = getCurrentUser();
+        let friendId = this.getAttribute('current-chat');
+
+        firebase
+            .firestore()
+            .collection('messages')
+            .where('owner', 'in', [currentUser.id, friendId])
+            .onSnapshot((result) => {
+                let rawData = getDataFromDocs(result.docs);
+
+                let messagesData = rawData.filter((messageData) => {
+                    return messageData.receiver == currentUser.id || messageData.receiver == friendId;
+                });
+
+                console.log(messagesData);
+
+                this.$messageList.setAttribute('data', JSON.stringify(messagesData));
+            });
+    }
+
+    async sendMessage(content) {
+        let currentUser = getCurrentUser();
+
+        await firebase.firestore().collection('messages').add({
+            content: content,
+            dateModified: new Date().toISOString(),
+            owner: currentUser.id,
+            receiver: this.getAttribute('current-chat')
+        });
     }
 
 }

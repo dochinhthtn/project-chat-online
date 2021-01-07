@@ -13,6 +13,7 @@ $template.innerHTML = /*html*/ `
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
         }
 
         #friend-email {
@@ -49,6 +50,12 @@ export default class FriendContainer extends HTMLElement {
     }
 
     connectedCallback() {
+        this.onclick = () => {
+            console.log("chuyển sang chat với" + this.getAttribute('name'));
+            
+            router.navigate('/chat/' + this.id);
+        }
+
         this.$makeFriend.onclick = async () => {
             this.$makeFriend.disabled = true; // tạm khóa nút
             await this.makeFriend(this.id);

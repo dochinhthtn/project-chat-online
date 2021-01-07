@@ -50,7 +50,7 @@ export default class LoginForm extends HTMLElement {
                 } else {
                     console.log(result);
                     saveCurrentUser(getDataFromDoc(result.docs[0]));
-                    router.navigate('/chat');
+                    router.navigate('/chat/0');
                 }
             }
 

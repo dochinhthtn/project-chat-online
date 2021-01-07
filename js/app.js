@@ -10,3 +10,15 @@ import MessageContainer from "./components/MessageContainer.js";
 import MessageList from "./components/MessageList.js";
 
 import ChatScreen from "./screens/ChatScreen.js";
+import { getDataFromDocs, getCurrentUser } from "./utils.js";
+
+
+
+// function realtimeUpdate() {
+//     let currentUser = getCurrentUser();
+//     firebase.firestore().collection('messages').where('owner', '==', currentUser.id).onSnapshot((result) => {
+//         console.log(getDataFromDocs(result.docs));
+//     });
+// }
+
+// realtimeUpdate();

@@ -1,4 +1,5 @@
 import MessageContainer from "./MessageContainer.js";
+import { getCurrentUser } from "../utils.js";
 
 const $template = document.createElement('template');
 $template.innerHTML = /*html*/ `
@@ -28,9 +29,23 @@ export default class MessageList extends HTMLElement {
     }
 
     attributeChangedCallback(attrName, oldValue, newValue) {
+        let currentUser = getCurrentUser();
+
         if (attrName == 'data') {
             let data = JSON.parse(newValue);
+
+            data.sort(function(message_1, message_2) {
+                let a = new Date(message_1.dateModified);
+                let b = new Date(message_2.dateModified);
+
+                return a - b;
+            });
+
+            this.$messageList.innerHTML = '';
+            
             for (let messageData of data) {
+                messageData.owned = currentUser.id == messageData.owner;
+
                 let $message = new MessageContainer(
                     messageData.content,
                     messageData.owned,

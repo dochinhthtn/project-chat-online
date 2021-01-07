@@ -1,11 +1,15 @@
 const $template = document.createElement('template');
 $template.innerHTML = /*html*/ `
     <style>
+        #message-container {
+            margin-bottom: 5px;
+        }
+
         #message-content {
             font-family: Arial;
             font-size: 15px;
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 20px;
             display: inline-block;
             background-color: #1995ad;
             color: white;

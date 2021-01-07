@@ -45,7 +45,11 @@ export default class InputWrapper extends HTMLElement {
         }
     }
 
-    value() {
+    value(newValue) {
+        if(newValue != undefined) {
+            this.$main.value = newValue;
+            return newValue;
+        }
         // $main là ô input
         return this.$main.value;
     }
